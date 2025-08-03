@@ -1,69 +1,42 @@
-<!DOCTYPE html>
-<html lang="tr">
+<!DOCTYPE html><html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>HZQUAREX Puan Sorgu</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puan Sorgulama</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #101820;
-      color: white;
-      text-align: center;
-    }
-    input, button, select {
-      padding: 10px;
-      margin: 5px;
-      font-size: 16px;
-    }
-    #sonuc {
-      margin-top: 20px;
-      font-weight: bold;
-      font-size: 18px;
-      color: #00e676;
-    }
+    body { font-family: sans-serif; background: #121212; color: #fff; padding: 20px; }
+    input, button, select { padding: 10px; font-size: 16px; border-radius: 5px; border: none; margin-top: 10px; width: 100%; }
+    button { background: #00c853; color: white; cursor: pointer; }
+    .result { margin-top: 20px; padding: 10px; background: #1e1e1e; border-radius: 5px; }
   </style>
 </head>
 <body>
-  <h2>💳 Kart Puan Sorgulama Sistemi</h2>
-  <p>Örnek giriş: <code>4543592092004524|05|2027|000</code></p>
-  <input type="text" id="kart" placeholder="Kart|Ay|Yıl|CVV" size="30" />
-  <br>
-  <button onclick="sorgula()">Kontrol Et</button>
+  <h2>Maxipuan Sorgulama</h2>
+  <input type="text" id="card" placeholder="Kart Bilgisi (|||| ile ayırın)">
+  <button onclick="checkPoints()">Kontrol Et</button>  <div id="result" class="result"></div>  <script>
+    async function checkPoints() {
+      const resultBox = document.getElementById("result");
+      const cardRaw = document.getElementById("card").value.trim();
 
-  <div id="sonuc"></div>
-
-  <script>
-    async function sorgula() {
-      const input = document.getElementById("kart").value.trim();
-      const sonucEl = document.getElementById("sonuc");
-      if (!input.includes("|")) {
-        sonucEl.innerText = "Hatalı format!";
+      if (!cardRaw.includes("|")) {
+        resultBox.innerText = "Lütfen kartı 4543xxxxxxxxxxxx|ay|yıl|cvv şeklinde girin.";
         return;
       }
 
-      const [cc, month, year, cvv] = input.split("|");
-      sonucEl.innerText = "Sorgulanıyor...";
+      const [cc, month, year, cvv] = cardRaw.split("|");
 
       try {
-        const res = await fetch("/api/puan", {
+        resultBox.innerText = "Sorgulanıyor...";
+        const res = await fetch("https://hzquarex-puan.onrender.com/api/puan", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ cc, month, year, cvv })
         });
-
-        const data = await res.json();
-
-        if (data.success) {
-          sonucEl.innerText = `✅ Puan: ${data.point} TL`;
-        } else {
-          sonucEl.innerText = `❌ Hata: ${data.message}`;
-        }
+        const data = await res.text();
+        resultBox.innerHTML = `<strong>Sonuç:</strong><br>${data}`;
       } catch (e) {
-        sonucEl.innerText = "❌ Sunucu hatası.";
+        resultBox.innerText = "Hata oluştu: " + e.message;
       }
     }
-  </script>
-</body>
+  </script></body>
 </html>
