@@ -10,6 +10,8 @@ app.post("/api/axxess", async (req, res) => {
   try {
     const { card_number, expiry_month, expiry_year, cvv } = req.body;
 
+    const domainFromClient = req.headers.host;
+
     const response = await axios.post(
       "https://checkout-gw.prod.ticimax.net/payments/9/card-point",
       {
@@ -19,7 +21,7 @@ app.post("/api/axxess", async (req, res) => {
           expireYear: expiry_year,
           cvc: cvv,
         },
-        domain_name: "magaza.ticimax.com", // ZORUNLU ALAN — eklendi
+        domain_name: domainFromClient,
       },
       {
         headers: {
@@ -39,5 +41,5 @@ app.post("/api/axxess", async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Sunucu ${PORT} portunda çalışıyor`);
+  console.log(Sunucu ${PORT} portunda çalışıyor);
 });
