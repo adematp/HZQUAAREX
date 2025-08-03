@@ -1,25 +1,21 @@
 const express = require("express");
-const path = require("path");
+const cors = require("cors");
 const app = express();
-const PORT = process.env.PORT || 3000;
+const puanRoute = require("./puan");
 
-// JSON veri alabilmek için
+app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// index.html ve diğer dosyaları sun
-app.use(express.static(path.join(__dirname)));
-
-// Ana sayfa: index.html'i göster
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
-
-// Puan API yönlendirme (puan.js dosyasını çağırır)
-const puanRoute = require("./api/puan");
+// Route bağlama
 app.use("/api/puan", puanRoute);
 
+// Ana sayfa
+app.get("/", (req, res) => {
+  res.send("API çalışıyor");
+});
+
 // Sunucuyu başlat
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Sunucu çalışıyor: http://localhost:${PORT}`);
+  console.log(`Sunucu çalışıyor: ${PORT}`);
 });
