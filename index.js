@@ -1,17 +1,25 @@
-import express from "express";
-import puanApi from "./api/puan.js";
-import cors from "cors";
-
+const express = require("express");
+const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
-app.use("/api/puan", puanApi);
+// JSON veri alabilmek için
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+// index.html ve diğer dosyaları sun
+app.use(express.static(path.join(__dirname)));
+
+// Ana sayfa: index.html'i göster
 app.get("/", (req, res) => {
-  res.send("Maxipuan API çalışıyor - @HzQuarex");
+  res.sendFile(path.join(__dirname, "index.html"));
 });
 
+// Puan API yönlendirme (puan.js dosyasını çağırır)
+const puanRoute = require("./api/puan");
+app.use("/api/puan", puanRoute);
+
+// Sunucuyu başlat
 app.listen(PORT, () => {
   console.log(`Sunucu çalışıyor: http://localhost:${PORT}`);
 });
