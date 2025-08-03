@@ -1,31 +1,67 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <title>Puan Sorgu</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HZQUAREX Puan Sorgu</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #101820;
+      color: white;
+      text-align: center;
+    }
+    input, button, select {
+      padding: 10px;
+      margin: 5px;
+      font-size: 16px;
+    }
+    #sonuc {
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 18px;
+      color: #00e676;
+    }
+  </style>
 </head>
 <body>
-  <h2>Kart Puan Sorgulama</h2>
-  <input type="text" id="card" placeholder="4543xxxxxxxxxxxx|05|2027|000">
-  <button onclick="kontrolEt()">Sorgula</button>
-  <pre id="sonuc"></pre>
+  <h2>💳 Kart Puan Sorgulama Sistemi</h2>
+  <p>Örnek giriş: <code>4543592092004524|05|2027|000</code></p>
+  <input type="text" id="kart" placeholder="Kart|Ay|Yıl|CVV" size="30" />
+  <br>
+  <button onclick="sorgula()">Kontrol Et</button>
+
+  <div id="sonuc"></div>
 
   <script>
-    async function kontrolEt() {
-      const card = document.getElementById("card").value;
-      const sonuc = document.getElementById("sonuc");
+    async function sorgula() {
+      const input = document.getElementById("kart").value.trim();
+      const sonucEl = document.getElementById("sonuc");
+      if (!input.includes("|")) {
+        sonucEl.innerText = "Hatalı format!";
+        return;
+      }
+
+      const [cc, month, year, cvv] = input.split("|");
+      sonucEl.innerText = "Sorgulanıyor...";
 
       try {
-        const res = await fetch("https://hzquarex-puan.onrender.com/api/puan", {
+        const res = await fetch("/api/puan", {
           method: "POST",
-          headers: { "Content-Type": "text/plain" },
-          body: card
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cc, month, year, cvv })
         });
 
-        const text = await res.text();
-        sonuc.textContent = text;
+        const data = await res.json();
+
+        if (data.success) {
+          sonucEl.innerText = `✅ Puan: ${data.point} TL`;
+        } else {
+          sonucEl.innerText = `❌ Hata: ${data.message}`;
+        }
       } catch (e) {
-        sonuc.textContent = "Hata oluştu: " + e;
+        sonucEl.innerText = "❌ Sunucu hatası.";
       }
     }
   </script>
